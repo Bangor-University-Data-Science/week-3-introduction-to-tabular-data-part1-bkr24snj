@@ -1,3 +1,5 @@
+import pandas as pd
+df = pd.read_csv('data/titanic.csv')
 def create_feature_type_dict(df):
     """
     Classifies features into numerical (continuous or discrete) and categorical (nominal or ordinal).
@@ -8,14 +10,27 @@ def create_feature_type_dict(df):
     Returns:
         dict: A dictionary classifying features into numerical and categorical types.
     """
-    feature_types = {
+    dict = {
         'numerical': {
-            'continuous': [],  # Fill with continuous numerical features
-            'discrete': []  # Fill with discrete numerical features
-        },
+            'continuous': [],
+            'discrete': [] 
+            },
         'categorical': {
-            'nominal': [],  # Fill with nominal categorical features
-            'ordinal': []  # Fill with ordinal categorical features
+            'nominal': [],  
+            'ordinal': []  
+            }
         }
-    }
-    return feature_types
+    numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns.to_list()
+    continuous_cols = [col for col in numerical_cols if df[col].nunique()>20]
+    discrete_cols = [col for col in numerical_cols if df[col].nunique()<=20]
+    dict['numerical']['continuous'] = continuous_cols
+    dict['numerical']['discrete'] = discrete_cols
+    
+    categorical_cols = df.select_dtypes(include = ['object', 'category', 'bool']).columns.to_list()
+    nominal_cols = [col for col in categorical_cols if col in ['Name', 'Sex', 'Embarked']]
+    ordinal_cols = [col for col in categorical_cols if col in ['Pclass']]
+    dict['categorical']['nominal'] = nominal_cols
+    dict['categorical']['ordinal'] = ordinal_cols
+        
+    return dict
+
